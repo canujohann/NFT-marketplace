@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Web3Modal from "web3modal";
 import Image from "next/image";
+import NftCard from "../Components/NftCard";
 
 import { nftaddress, nftmarketaddress } from "../config.js";
 
@@ -91,37 +92,17 @@ export default function Home() {
   if (loadingState === "loaded" && !nfts.length)
     return <h1 className="px-20 py-10 text-3xl">Empty Items in Marketplace</h1>;
   return (
-    <div className="flex justify-center">
-      <div className="px-4" style={{ maxWidth: "1600px" }}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-          {nfts.map((nft, i) => (
-            <div key={i} className="border shadow rounded-xl overflow-hidden">
-              <Image src={nft.image} width={300} height={400} />
-              <div className="p-4">
-                <p
-                  style={{ height: "64px" }}
-                  className="text-2xl font-semibold"
-                >
-                  {nft.name}
-                </p>
-                <div style={{ height: "70px", overflow: "hidden" }}>
-                  <p className="text-gray-400">{nft.description}</p>
-                </div>
-              </div>
-              <div className="p-4 bg-black">
-                <p className="text-2xl mb-4 font-bold text-white">
-                  {nft.price} Ether
-                </p>
-                <button
-                  className="w-full bg-yellow-600 text-white font-bold py-2 px-12 rounded"
-                  onClick={() => buyNft(nft)}
-                >
-                  Buy
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className="container">
+      <div className="grid grid-cols-4 gap-4 mx-auto">
+        {nfts.map((nft, i) => (
+          <NftCard
+            key={nft.image}
+            i={i}
+            nft={nft}
+            action={buyNft}
+            actionName="Buy"
+          />
+        ))}
       </div>
     </div>
   );

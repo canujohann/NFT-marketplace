@@ -93,7 +93,7 @@ export default function CreateItem() {
     <div className="flex justify-center">
       <div className="w-1/2 flex flex-col pb-12">
         <input
-          placeholder="  NFT Name"
+          placeholder=" NFT Name"
           className="mt-8 border rounded p-4"
           onChange={(e) =>
             updateFormInput({ ...formInput, name: e.target.value })
