@@ -1,66 +1,68 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# About this project
 
-## Getting Started
+This project is a a NFT marketplace for the blockchains Ethereum / Polygon. You can easily customize it and deploy it as a real market on your favorite blockchain !
 
-First, run the development server:
+![top](/docs/top.png)
+
+# Technology stack
+
+- React (Nextjs)
+- Tailwind
+- Solidity (0.8.11)
+- Web3 library
+- MetaMask
+- Truffle
+- Infura (IPFS)
+- Ganache (only needed if you want to test locally your contract)
+
+# Getting Started
+
+## Smart contract (Backend)
+
+Contracts are available under the `contracts` folder. Update the `truffle-config` file with your own blockchain networks. `Localhost` is already set (port 7545) and will work out of the box.
+
+- Start Ganache (if localhost)
+- Create a **.secret** file that contains your ganache seedphrase
+- Deploy the contract :
+
+```
+npm install
+truffle deploy --network development
+```
+
+- Save your 2 contracts addresses in `.env.local` :
+
+```
+NEXT_PUBLIC_MARKET_ADDRESS="0xE6Cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+NEXT_PUBLIC__NFT_ADDRESS="0xE6Cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+```
+
+> You can easily retrieve your contract addresses in connecting ganache to your `truffle-config.js` file (see capture)
+
+![ganache truffle connection](/docs/ganache-truffle.png)
+
+- Create an IPFS account on Infura and update your `.env.local` as below :
+
+```
+NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID="xxxxx"
+NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET="yyyyy"
+NEXT_PUBLIC_INFURA_IPFS_PRIVATE_GATEWAY="https://your-account.infura-ipfs.io/ipfs"
+```
+
+## Frontend
+
+run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+# Next step
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+You can create PR to enhance it :
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-
----
-
-johann note
-
-how to run locally, and in real env
-
-```
-npm install
-```
-
-Update your list of keywords in a ".secret" file
-
-command to build and deploy:
-
-```
-truffle compile
-truffle migrate
-```
-
-update contract url in
-config.js
-
-for production :
-update mainnet and testnet url in truffle-config
-
-deploy contract with
-
-```
-truffle deploy
- truffle migrate --network live
-```
+- Component refactoring (react)
+- Smart contract enhancement
+- etc.
