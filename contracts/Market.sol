@@ -56,7 +56,7 @@ contract NFTMarket is ReentrancyGuard {
         return listingPrice;
     }
 
-    /* Places an item for sale on the marketplace */
+    /* Places an item for sale on the marketplace (= mint) */
     function createMarketItem(
         address nftContract,
         uint256 tokenId,
@@ -67,6 +67,10 @@ contract NFTMarket is ReentrancyGuard {
         require(
             msg.value == listingPrice,
             "Price must be equal to listing price"
+        );
+        require(
+            royaltiesPercentage <= 15,
+            "Please submit a royalties under 15%"
         );
 
         // Generate a new id
@@ -102,9 +106,7 @@ contract NFTMarket is ReentrancyGuard {
         );
     }
 
-    /* Creates the sale of a marketplace item */
-    /* Transfers ownership of the item, as well as funds between parties */
-
+    /* Creates the sale of a marketplace item (= sell) */
     function createMarketSale(address nftContract, uint256 itemId)
         public
         payable

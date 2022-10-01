@@ -37,6 +37,7 @@ export default function CreateItem() {
     price: "",
     name: "",
     description: "",
+    royalties: 0,
   });
   const router = useRouter();
 
@@ -54,8 +55,18 @@ export default function CreateItem() {
     }
   }
   async function createItem() {
-    const { name, description, price } = formInput;
-    if (!name || !description || !price || !fileUrl) return;
+    const { name, description, price, royalties } = formInput;
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !fileUrl ||
+      royalties > 15 ||
+      royalties < 0
+    ) {
+      alert("please input all fields !");
+      return;
+    }
     const data = JSON.stringify({
       name,
       description,
@@ -90,9 +101,15 @@ export default function CreateItem() {
     listingPrice = listingPrice.toString();
 
     // Create the marketId
-    transaction = await contract.createMarketItem(nftaddress, tokenId, price, {
-      value: listingPrice,
-    });
+    transaction = await contract.createMarketItem(
+      nftaddress,
+      tokenId,
+      price,
+      royalties,
+      {
+        value: listingPrice,
+      }
+    );
     await transaction.wait();
 
     // Redirect
@@ -124,6 +141,15 @@ export default function CreateItem() {
               updateFormInput({ ...formInput, price: e.target.value })
             }
           />
+
+          <input
+            placeholder="Royalties in %  (between 0 and 15)"
+            className="mt-2 border rounded p-4"
+            onChange={(e) =>
+              updateFormInput({ ...formInput, royalties: e.target.value })
+            }
+          />
+
           <input
             type="file"
             name="Asset"
