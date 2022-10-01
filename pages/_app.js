@@ -4,7 +4,7 @@ import Link from "next/link";
 function LinkMenu({ url, title }) {
   return (
     <Link href={url}>
-      <a class="text-xl block m-4 lg:inline-block lg:mt-0 text-black hover:text-slate-500">
+      <a className="text-xl block m-4 lg:inline-block lg:mt-0 text-black hover:text-slate-500">
         {title}
       </a>
     </Link>
@@ -12,7 +12,7 @@ function LinkMenu({ url, title }) {
 }
 function Marketplace({ Component, pageProps }) {
   return (
-    <div className="container px-5">
+    <div className="container p-10">
       <div className="flex-1 h-screen flex flex-col">
         {/* Main title */}
         <h1

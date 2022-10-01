@@ -5,6 +5,7 @@ import Web3Modal from "web3modal";
 import { nftaddress, nftmarketaddress } from "../config.js";
 import SubTitle from "../Components/SubTitle";
 import NftCard from "../Components/NftCard";
+import Title from "../Components/Title";
 
 import NFT from "../build/contracts/NFT.json";
 import NFTMarket from "../build/contracts/NFTMarket.json";
@@ -53,6 +54,7 @@ export default function CreatorDashboard() {
   }
   return (
     <div className="container">
+      <Title>Dashboard</Title>
       {/* Items created */}
       <SubTitle>Items Created</SubTitle>
       <div className="grid grid-cols-4 gap-4 mx-auto">

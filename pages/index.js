@@ -5,6 +5,7 @@ import axios from "axios";
 import Web3Modal from "web3modal";
 import Image from "next/image";
 import NftCard from "../Components/NftCard";
+import Title from "../Components/Title";
 
 import { nftaddress, nftmarketaddress } from "../config.js";
 
@@ -93,6 +94,7 @@ export default function Home() {
     return <h1 className="px-20 py-10 text-3xl">Empty Items in Marketplace</h1>;
   return (
     <div className="container">
+      <Title>Market</Title>
       <div className="grid grid-cols-4 gap-4 mx-auto">
         {nfts.map((nft, i) => (
           <NftCard

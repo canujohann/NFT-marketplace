@@ -10,7 +10,7 @@ const NftCard = ({ nft, action, actionName, i }) => (
         style={{ objectFit: "cover", width: "100%", height: "100%" }}
       />
     </div>
-    <div className="p-4 bg-zinc-100 hover:bg-slate-500">
+    <div className="p-4 bg-zinc-100">
       {/* name */}
       <p className="text-2xl text-center font-bold text-black">{nft.name}</p>
       {/* price*/}

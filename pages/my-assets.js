@@ -5,6 +5,7 @@ import Web3Modal from "web3modal";
 import { nftaddress, nftmarketaddress } from "../config.js";
 import SubTitle from "../Components/SubTitle";
 import NftCard from "../Components/NftCard";
+import Title from "../Components/Title";
 
 import NFT from "../build/contracts/NFT.json";
 import NFTMarket from "../build/contracts/NFTMarket.json";
@@ -15,6 +16,8 @@ export default function MyAssets() {
   useEffect(() => {
     loadNFTs();
   }, []);
+
+  // Retrieve data directly from the contract
   async function loadNFTs() {
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
@@ -38,6 +41,8 @@ export default function MyAssets() {
           seller: i.seller,
           owner: i.owner,
           image: meta.data.image,
+          name: meta.data.name,
+          description: meta.data.description,
         };
         return item;
       })
@@ -50,6 +55,7 @@ export default function MyAssets() {
 
   return (
     <div className="container">
+      <Title>My NFTs </Title>
       <div className="grid grid-cols-4 gap-4 mx-auto">
         {nfts.map((nft, i) => (
           <NftCard key={nft.image} i={i} nft={nft} />

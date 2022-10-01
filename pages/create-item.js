@@ -3,8 +3,8 @@ import { ethers } from "ethers";
 import { create as ipfsHttpClient } from "ipfs-http-client";
 import { useRouter } from "next/router";
 import Web3Modal from "web3modal";
-
-//import { NftButton } from "./../components/NftButton";
+import NftButton from "../Components/NftButton";
+import Title from "../Components/Title";
 
 const privateGatewayIpfs = process.env.NEXT_PUBLIC_INFURA_IPFS_PRIVATE_GATEWAY;
 
@@ -45,7 +45,6 @@ export default function CreateItem() {
       const added = await client.add(file, {
         progress: (prog) => console.log(`received: ${prog}`),
       });
-      console.log(`info received from infura::   ${JSON.stringify(added)}`);
       const url = `${privateGatewayIpfs}/${added.path}`;
       setFileUrl(url);
     } catch (e) {
@@ -90,37 +89,48 @@ export default function CreateItem() {
     router.push("/");
   }
   return (
-    <div className="flex justify-center">
-      <div className="w-1/2 flex flex-col pb-12">
-        <input
-          placeholder=" NFT Name"
-          className="mt-8 border rounded p-4"
-          onChange={(e) =>
-            updateFormInput({ ...formInput, name: e.target.value })
-          }
-        />
-        <textarea
-          placeholder="NFT Description"
-          className="mt-8 border rounded p-4"
-          onChange={(e) =>
-            updateFormInput({ ...formInput, description: e.target.value })
-          }
-        />
-        <input
-          placeholder="NFT Price in Eth"
-          className="mt-2 border rounded p-4"
-          onChange={(e) =>
-            updateFormInput({ ...formInput, price: e.target.value })
-          }
-        />
-        <input type="file" name="Asset" className="my-4" onChange={onChange} />
-        {fileUrl && <img className="rounded mt-4 " width="350" src={fileUrl} />}
-        <button
-          onClick={createItem}
-          className="font-bold mt-4 text-white rounded p-4 shadow-lg bg-gradient-to-l from-blue-500 to-teal-400"
-        >
-          Create NFT
-        </button>
+    <div className="container">
+      <Title>Mint your NFT !</Title>
+      <div className="flex justify-center">
+        <div className="w-1/2 flex flex-col pb-12">
+          <input
+            placeholder=" NFT Name"
+            className="mt-8 border rounded p-4"
+            onChange={(e) =>
+              updateFormInput({ ...formInput, name: e.target.value })
+            }
+          />
+          <textarea
+            placeholder="NFT Description"
+            className="mt-8 border rounded p-4"
+            onChange={(e) =>
+              updateFormInput({ ...formInput, description: e.target.value })
+            }
+          />
+          <input
+            placeholder="NFT Price in Eth"
+            className="mt-2 border rounded p-4"
+            onChange={(e) =>
+              updateFormInput({ ...formInput, price: e.target.value })
+            }
+          />
+          <input
+            type="file"
+            name="Asset"
+            className="my-4"
+            onChange={onChange}
+          />
+          {fileUrl && (
+            <img
+              alt="your-nft"
+              className="rounded mt-4 "
+              width="350"
+              src={fileUrl}
+            />
+          )}
+
+          <NftButton clickAction={createItem}>Create NFT</NftButton>
+        </div>
       </div>
     </div>
   );
