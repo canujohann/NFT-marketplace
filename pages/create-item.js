@@ -30,6 +30,7 @@ import { nftaddress, nftmarketaddress } from "../config.js";
 import NFT from "../build/contracts/NFT.json";
 import NFTMarket from "../build/contracts/NFTMarket.json";
 
+//
 export default function CreateItem() {
   const [fileUrl, setFileUrl] = useState(null);
   const [formInput, updateFormInput] = useState({
@@ -39,6 +40,7 @@ export default function CreateItem() {
   });
   const router = useRouter();
 
+  // Upload on IPFS
   async function onChange(e) {
     const file = e.target.files[0];
     try {
@@ -73,19 +75,27 @@ export default function CreateItem() {
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
     let contract = new ethers.Contract(nftaddress, NFT.abi, signer);
+
+    // Create first a token on NFT contract
     let transaction = await contract.createToken(url);
     let tx = await transaction.wait();
     let event = tx.events[0];
     let value = event.args[2];
     let tokenId = value.toNumber();
     const price = ethers.utils.parseUnits(formInput.price, "ether");
+
+    // Get listing price
     contract = new ethers.Contract(nftmarketaddress, NFTMarket.abi, signer);
     let listingPrice = await contract.getListingPrice();
     listingPrice = listingPrice.toString();
+
+    // Create the marketId
     transaction = await contract.createMarketItem(nftaddress, tokenId, price, {
       value: listingPrice,
     });
     await transaction.wait();
+
+    // Redirect
     router.push("/");
   }
   return (
