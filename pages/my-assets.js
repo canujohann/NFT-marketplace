@@ -36,6 +36,7 @@ export default function MyAssets() {
         const meta = await axios.get(tokenUri);
         let price = ethers.utils.formatUnits(i.price.toString(), "ether");
         let item = {
+          royaltiesPercentage: i.royaltiesPercentage,
           price,
           tokenId: i.tokenId.toNumber(),
           seller: i.seller,

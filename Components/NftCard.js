@@ -17,6 +17,8 @@ const NftCard = ({ nft, action, actionName, i }) => (
       <p className="text-black text-center">
         <Image src="/ether-logo.svg" width={20} height={20} />
         Price - {nft.price} ETH
+        <br />
+        royalties: {nft.royaltiesPercentage}%
       </p>
       <p className="pt-4 text-center">{nft.description}</p>
       {action && (
