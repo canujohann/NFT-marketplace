@@ -47,6 +47,7 @@ export default function Home() {
             .call();
           const meta = await axios.get(tokenUri);
           let price = ethers.utils.formatUnits(i.price.toString(), "ether");
+          console.log(`>>>info in i are ${i.itemId}`);
           let item = {
             royaltiesPercentage: i.royaltiesPercentage,
             price,
@@ -55,6 +56,7 @@ export default function Home() {
             image: meta.data.image,
             name: meta.data.name,
             description: meta.data.description,
+            itemId: i.itemid,
           };
           return item;
         })
@@ -98,13 +100,15 @@ export default function Home() {
       <Title>Market</Title>
       <div className="grid grid-cols-4 gap-4 mx-auto">
         {nfts.map((nft, i) => (
-          <NftCard
-            key={nft.image}
-            i={i}
-            nft={nft}
-            action={buyNft}
-            actionName="Buy"
-          />
+          <>
+            <NftCard
+              key={nft.image}
+              i={i}
+              nft={nft}
+              action={buyNft}
+              actionName="Buy"
+            />
+          </>
         ))}
       </div>
     </div>

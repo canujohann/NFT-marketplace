@@ -23,8 +23,6 @@ const client = ipfsHttpClient({
   },
 });
 
-//const client = ipfsHttpClient(`https://ipfs.infura.io:5001/api/v0`);
-
 import { nftaddress, nftmarketaddress } from "../config.js";
 
 import NFT from "../build/contracts/NFT.json";
@@ -91,36 +89,29 @@ export default function CreateItem() {
     }
   }
   async function createSale(url) {
-    console.log(">>> we are in createSale");
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
-    let contract = new ethers.Contract(nftaddress, NFT.abi, signer);
-
-    // Create first a token on NFT contract
-    // TODO put this logic in the Market contract
-    let transaction = await contract.createToken(url);
-    let tx = await transaction.wait();
-    let event = tx.events[0];
-    let value = event.args[2];
-    console.log(`>>> value is ${value}`);
-    let tokenId = value.toNumber();
-    const price = ethers.utils.parseUnits(formInput.price, "ether");
-    const royalties = parseInt(formInput.royalties, 10);
-    console.log(`>>> and price = ${price} and royalties = ${royalties}`);
-
-    // Get listing price
-    contract = new ethers.Contract(nftmarketaddress, NFTMarket.abi, signer);
-    let listingPrice = await contract.getListingPrice();
-    listingPrice = listingPrice.toString();
-    console.log(`>>>> listingPrice is ${listingPrice}`);
-
-    console.log(
-      `>>>>> nftaddress is ${nftaddress} and tokenId is ${tokenId} and price is ${price} and  royalties is ${royalties} and listingPrice is ${listingPrice}`
-    );
-
     try {
+      const web3Modal = new Web3Modal();
+      const connection = await web3Modal.connect();
+      const provider = new ethers.providers.Web3Provider(connection);
+      const signer = provider.getSigner();
+      let contract = new ethers.Contract(nftaddress, NFT.abi, signer);
+
+      // Create first a token on NFT contract
+      // TODO put this logic in the Market contract
+      let transaction = await contract.createToken(url);
+      let tx = await transaction.wait();
+      let event = tx.events[0];
+      let value = event.args[2];
+
+      let tokenId = value.toNumber();
+      const price = ethers.utils.parseUnits(formInput.price, "ether");
+      const royalties = parseInt(formInput.royalties, 10);
+
+      // Get listing price
+      contract = new ethers.Contract(nftmarketaddress, NFTMarket.abi, signer);
+      let listingPrice = await contract.getListingPrice();
+      listingPrice = listingPrice.toString();
+
       // Create the marketId
       transaction = await contract.createMarketItem(
         nftaddress,
@@ -136,7 +127,7 @@ export default function CreateItem() {
       // Redirect
       router.push("/");
     } catch (e) {
-      console.log(`content of error is ${JSON.stringify(e)}`);
+      console.log(`content of error is ${e}`);
     }
   }
   return (

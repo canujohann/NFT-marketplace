@@ -8,8 +8,9 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 contract NFTMarket is ReentrancyGuard {
     using Counters for Counters.Counter;
 
+    // counter for item IDs
     Counters.Counter private _itemIds;
-    Counters.Counter private _itemsSold;
+    Counters.Counter private _itemsSold; //TODO to remove
 
     // Owner of the marketplace (Receives the listing fees)
     address payable owner;
@@ -23,6 +24,8 @@ contract NFTMarket is ReentrancyGuard {
     }
 
     // NFT item information
+    // Both `seller` and `owner` are needed when doing a listing
+    // Original creator is needed for the royalties
     struct MarketItem {
         uint256 itemid;
         address nftContract;
@@ -30,7 +33,7 @@ contract NFTMarket is ReentrancyGuard {
         address payable seller;
         address payable owner;
         uint256 price;
-        bool sold;
+        uint256 sold;
         uint8 royaltiesPercentage;
         address payable originalCreator;
     }
@@ -46,9 +49,19 @@ contract NFTMarket is ReentrancyGuard {
         address seller,
         address owner,
         uint256 price,
-        bool sold,
+        uint256 sold,
         uint8 royaltiesPercentage,
         address originalCreator
+    );
+
+    // Event when an existing NFT is re-listed
+    event MarketItemRelisted(
+        uint256 indexed itemId,
+        address indexed nftContract,
+        uint256 indexed tokenId,
+        address seller,
+        address owner,
+        uint256 price
     );
 
     /* Returns the listing price of the contract */
@@ -56,7 +69,7 @@ contract NFTMarket is ReentrancyGuard {
         return listingPrice;
     }
 
-    /* Places an item for sale on the marketplace (= mint) */
+    /* Create a item and list it on the marketplace (= mint) */
     function createMarketItem(
         address nftContract,
         uint256 tokenId,
@@ -85,7 +98,7 @@ contract NFTMarket is ReentrancyGuard {
             payable(msg.sender),
             payable(address(0)),
             price,
-            false,
+            0,
             royaltiesPercentage,
             payable(msg.sender)
         );
@@ -100,22 +113,22 @@ contract NFTMarket is ReentrancyGuard {
             msg.sender,
             address(0),
             price,
-            false,
+            0,
             royaltiesPercentage,
             msg.sender
         );
     }
 
-    /* Creates the sale of a marketplace item (= sell) */
+    /* When an item is bought on the marketplace */
     function createMarketSale(address nftContract, uint256 itemId)
         public
         payable
         nonReentrant
     {
         uint256 price = idToMarketItem[itemId].price;
-        uint256 tokenId = idToMarketItem[itemId].tokenId;
         uint8 royaltiesPercentage = idToMarketItem[itemId].royaltiesPercentage;
 
+        // Validation
         require(
             msg.value == price,
             "Please submit the asking price in order to complete the purchase"
@@ -132,10 +145,14 @@ contract NFTMarket is ReentrancyGuard {
         );
 
         // Change the ownership within the NFT contract
-        IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
+        IERC721(nftContract).transferFrom(
+            address(this),
+            msg.sender,
+            idToMarketItem[itemId].tokenId
+        );
 
         idToMarketItem[itemId].owner = payable(msg.sender);
-        idToMarketItem[itemId].sold = true;
+        idToMarketItem[itemId].sold = idToMarketItem[itemId].sold++;
 
         _itemsSold.increment();
 
@@ -143,7 +160,48 @@ contract NFTMarket is ReentrancyGuard {
         payable(owner).transfer(listingPrice);
     }
 
-    /* Returns all unsold market items */
+    // When an owner want to list his token ( = sell it)
+    function listMarketItem(
+        uint256 itemId,
+        uint256 price,
+        address nftContract
+    ) public payable nonReentrant {
+        // Validation
+        require(price > 0, "Price must be at least 1 wei");
+        require(
+            msg.value == listingPrice,
+            "Price must be equal to listing price"
+        );
+        require(
+            idToMarketItem[itemId].owner == msg.sender,
+            "Only the owner can sell his own NFT"
+        );
+
+        // Update the seller and owner value
+        idToMarketItem[itemId].seller = idToMarketItem[itemId].owner;
+        idToMarketItem[itemId].owner = payable(address(0));
+
+        // Update the ownership (from creator to the market contract address)
+        IERC721(nftContract).transferFrom(
+            msg.sender,
+            address(this),
+            idToMarketItem[itemId].tokenId
+        );
+
+        // Since NFT was listed , need to decrement the number of sold item
+        _itemsSold.decrement();
+
+        emit MarketItemRelisted(
+            itemId,
+            nftContract,
+            idToMarketItem[itemId].tokenId,
+            msg.sender,
+            address(0),
+            price
+        );
+    }
+
+    /* Returns all listed market items */
     function fetchMarketItems() public view returns (MarketItem[] memory) {
         uint256 itemCount = _itemIds.current();
         uint256 unsoldItemCount = _itemIds.current() - _itemsSold.current();
@@ -164,7 +222,6 @@ contract NFTMarket is ReentrancyGuard {
     }
 
     /* Returns only items that a user has purchased */
-
     function fetchMyNFTs() public view returns (MarketItem[] memory) {
         uint256 totalItemCount = _itemIds.current();
         uint256 itemCount = 0;
@@ -190,7 +247,6 @@ contract NFTMarket is ReentrancyGuard {
     }
 
     /* Returns only items a user has created */
-
     function fetchItemsCreated() public view returns (MarketItem[] memory) {
         uint256 totalItemCount = _itemIds.current();
         uint256 itemCount = 0;
@@ -213,5 +269,10 @@ contract NFTMarket is ReentrancyGuard {
             }
         }
         return items;
+    }
+
+    /* Returns only specific item */
+    function fetchItem(uint256 itemId) public view returns (MarketItem memory) {
+        return idToMarketItem[itemId];
     }
 }
