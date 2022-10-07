@@ -14,6 +14,7 @@ import NFTMarket from "../build/contracts/NFTMarket.json";
 
 export default function Home() {
   const [nfts, setNfts] = useState([]);
+  const [account, setAccount] = useState("");
   const [loadingState, setLoadingState] = useState("not-loaded");
 
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function Home() {
     const web3 = new Web3(window.ethereum);
     //get all accounts
     const appaccounts = await web3.eth.getAccounts();
+    setAccount(appaccounts[0]);
     const networkId = await web3.eth.net.getId();
 
     const nftData = NFT.networks[networkId];
@@ -101,13 +103,18 @@ export default function Home() {
       <div className="grid grid-cols-4 gap-4 mx-auto">
         {nfts.map((nft, i) => (
           <>
-            <NftCard
-              key={nft.image}
-              i={i}
-              nft={nft}
-              action={buyNft}
-              actionName="Buy"
-            />
+            {nft.seller === account && (
+              <NftCard key={nft.image} i={i} nft={nft} />
+            )}
+            {nft.seller !== account && (
+              <NftCard
+                key={nft.image}
+                i={i}
+                nft={nft}
+                action={buyNft}
+                actionName="Buy"
+              />
+            )}
           </>
         ))}
       </div>
