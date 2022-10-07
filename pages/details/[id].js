@@ -5,6 +5,7 @@ import axios from "axios";
 import Web3Modal from "web3modal";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 import NftCard from "../../Components/NftCard";
 import Title from "../../Components/Title";
@@ -15,6 +16,14 @@ import { nftaddress, nftmarketaddress } from "../../config.js";
 
 import NFT from "../../build/contracts/NFT.json";
 import NFTMarket from "../../build/contracts/NFTMarket.json";
+
+const TableTh = ({ children }) => {
+  return <th className="p-2">{children}</th>;
+};
+
+const TableTd = ({ children }) => {
+  return <td className="p-2">{children}</td>;
+};
 
 export default function Details() {
   const [nft, setNft] = useState([]);
@@ -93,11 +102,13 @@ export default function Details() {
         royaltiesPercentage: data.royaltiesPercentage,
         price,
         tokenId: data.tokenId,
-        seller: data.owner,
+        owner: data.owner,
         image: meta.data.image,
         name: meta.data.name,
         description: meta.data.description,
         itemId: data.itemid,
+        creator: data.originalCreator,
+        tokenId: data.tokenId,
       };
       setNft(item);
       setLoadingState("loaded");
@@ -110,10 +121,48 @@ export default function Details() {
     <div className="container">
       <div className="flex flex-row">
         <div className="basis-1/2">
-          <NftCard nft={nft} />
+          <div className="w-150 h-150">
+            <img className="cursor-pointer shadow-2xl" src={nft.image} />
+          </div>
         </div>
         <div className="basis-1/2">
-          {nft.seller == currentAccount && (
+          <table className="table-auto border text-left">
+            <tr className="border-b">
+              <TableTh>Name</TableTh>
+              <TableTd>{nft.name}</TableTd>
+            </tr>
+
+            <tr className="border-b">
+              <TableTh>Creator</TableTh>
+              <TableTd>{nft.creator} </TableTd>
+            </tr>
+
+            <tr className="border-b">
+              <TableTh>Current owner</TableTh>
+              <TableTd>{nft.owner} </TableTd>
+            </tr>
+
+            <tr className="border-b">
+              <TableTh>Description</TableTh>
+              <TableTd>{nft.description}</TableTd>
+            </tr>
+
+            <tr className="border-b">
+              <TableTh className="p-2">Price</TableTh>
+              <TableTd>{nft.price} ETH</TableTd>
+            </tr>
+
+            <tr className="border-b">
+              <TableTh>Royalties</TableTh>
+              <TableTd>{nft.royaltiesPercentage} %</TableTd>
+            </tr>
+
+            <tr className="border-b">
+              <TableTh>token ID</TableTh>
+              <TableTd>{nft.tokenId}</TableTd>
+            </tr>
+          </table>
+          {nft.owner == currentAccount && (
             <>
               <SubTitle>List the token (owner only)</SubTitle>
 
