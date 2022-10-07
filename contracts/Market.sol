@@ -154,6 +154,12 @@ contract NFTMarket is ReentrancyGuard {
             "Please submit the asking price in order to complete the purchase"
         );
 
+        // Seller can't buy his own token
+        require(
+            idToMarketItem[itemId].seller != msg.sender,
+            "You can't buy your own token"
+        );
+
         // Transfer the value to the owner (with deduction of the royalties)
         idToMarketItem[itemId].seller.transfer(
             msg.value * (1 - (royaltiesPercentage / 100))
@@ -270,6 +276,7 @@ contract NFTMarket is ReentrancyGuard {
 
         // Calculate number of NFT owned by the user
         // This value is needed to know the size of the returned array
+        // (impossible to instantiate a memory dynamic array in solidity )
         for (uint256 i = 0; i < totalItemCount; i++) {
             if (idToMarketItem[i + 1].owner == msg.sender) {
                 itemCount += 1;
