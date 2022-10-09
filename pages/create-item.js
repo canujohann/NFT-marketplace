@@ -1,32 +1,24 @@
 import { useState } from "react";
 import { ethers } from "ethers";
-import { create as ipfsHttpClient } from "ipfs-http-client";
+
 import { useRouter } from "next/router";
 import Web3Modal from "web3modal";
 import NftButton from "../Components/NftButton";
 import Title from "../Components/Title";
 
-const privateGatewayIpfs = process.env.NEXT_PUBLIC_INFURA_IPFS_PRIVATE_GATEWAY;
-
-const projectId = process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID;
-const projectSecret = process.env.NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET;
-const auth =
-  "Basic " + Buffer.from(projectId + ":" + projectSecret).toString("base64");
-
-const client = ipfsHttpClient({
-  host: "ipfs.infura.io",
-  port: 5001,
-  protocol: "https",
-  apiPath: "/api/v0",
-  headers: {
-    authorization: auth,
-  },
-});
-
 import { nftaddress, nftmarketaddress } from "../config.js";
-
 import NFT from "../build/contracts/NFT.json";
 import NFTMarket from "../build/contracts/NFTMarket.json";
+
+import {
+  getContracts,
+  getMetaDataAndParseItem,
+  getIPFSClient,
+} from "../utils/web3Utils";
+
+// IPFS related
+const privateGatewayIpfs = process.env.NEXT_PUBLIC_INFURA_IPFS_PRIVATE_GATEWAY;
+const client = getIPFSClient();
 
 //
 export default function CreateItem() {
@@ -90,15 +82,11 @@ export default function CreateItem() {
   }
   async function createSale(url) {
     try {
-      const web3Modal = new Web3Modal();
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const signer = provider.getSigner();
-      let contract = new ethers.Contract(nftaddress, NFT.abi, signer);
+      const { appAccount, tokenContract, marketContract } =
+        await getContracts();
 
       // Create first a token on NFT contract
-      // TODO put this logic in the Market contract
-      let transaction = await contract.createToken(url);
+      let transaction = await tokenContract.createToken(url);
       let tx = await transaction.wait();
       let event = tx.events[0];
       let value = event.args[2];
@@ -108,12 +96,11 @@ export default function CreateItem() {
       const royalties = parseInt(formInput.royalties, 10);
 
       // Get listing price
-      contract = new ethers.Contract(nftmarketaddress, NFTMarket.abi, signer);
-      let listingPrice = await contract.getListingPrice();
+      let listingPrice = await marketContract.getListingPrice();
       listingPrice = listingPrice.toString();
 
       // Create the marketId
-      transaction = await contract.createMarketItem(
+      transaction = await marketContract.createMarketItem(
         nftaddress,
         tokenId,
         price,

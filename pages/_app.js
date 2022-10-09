@@ -12,7 +12,7 @@ function LinkMenu({ url, title }) {
 }
 function Marketplace({ Component, pageProps }) {
   return (
-    <div className="container p-10">
+    <div className="container p-5 m-5">
       <div className="flex-1 h-screen flex flex-col">
         {/* Main title */}
         <h1
@@ -26,9 +26,9 @@ function Marketplace({ Component, pageProps }) {
         </h1>
 
         {/* Menu */}
-        <nav class="flex items-center justify-between flex-wrap">
-          <div class="block lg:hidden"></div>
-          <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
+        <nav className="flex items-center justify-between flex-wrap">
+          <div className="block lg:hidden"></div>
+          <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
             <LinkMenu url="/" title="Home" />
             <LinkMenu url="/create-item" title="Mint NFT" />
             <LinkMenu url="my-assets/" title="My NFT" />

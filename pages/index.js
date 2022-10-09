@@ -1,16 +1,12 @@
-import { ethers } from "ethers";
-import Web3 from "web3";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import Web3Modal from "web3modal";
 import Image from "next/image";
+import { ethers } from "ethers";
+
 import NftCard from "../Components/NftCard";
 import Title from "../Components/Title";
+import { getContracts, getMetaDataAndParseItem } from "../utils/web3Utils";
 
 import { nftaddress, nftmarketaddress } from "../config.js";
-
-import NFT from "../build/contracts/NFT.json";
-import NFTMarket from "../build/contracts/NFTMarket.json";
 
 export default function Home() {
   const [nfts, setNfts] = useState([]);
@@ -21,70 +17,30 @@ export default function Home() {
     loadNFTs();
   }, []);
 
+  // Load all the listed NFT
   async function loadNFTs() {
-    const web3 = new Web3(window.ethereum);
-    //get all accounts
-    const appaccounts = await web3.eth.getAccounts();
-    setAccount(appaccounts[0]);
-    const networkId = await web3.eth.net.getId();
+    const { appAccount, tokenContract, marketContract } = await getContracts();
 
-    const nftData = NFT.networks[networkId];
-    const marketData = NFTMarket.networks[networkId];
-
-    if (nftData && marketData) {
-      var abi = NFT.abi;
-      var address = nftData.address;
-      const tokenContract = new web3.eth.Contract(abi, address);
-
-      abi = NFTMarket.abi;
-      address = marketData.address;
-      const marketContract = new web3.eth.Contract(abi, address);
-
-      const data = await marketContract.methods.fetchMarketItems().call();
-
+    if (appAccount) {
+      setAccount(appAccount);
+      const data = await marketContract.fetchMarketItems();
       const items = await Promise.all(
         data.map(async (i) => {
-          const tokenUri = await tokenContract.methods
-            .tokenURI(i.tokenId)
-            .call();
-          const meta = await axios.get(tokenUri);
-          let price = ethers.utils.formatUnits(i.price.toString(), "ether");
-          console.log(`>>>info in i are ${i.itemId}`);
-          let item = {
-            royaltiesPercentage: i.royaltiesPercentage,
-            price,
-            tokenId: i.tokenId,
-            seller: i.owner,
-            image: meta.data.image,
-            name: meta.data.name,
-            description: meta.data.description,
-            itemId: i.itemid,
-          };
-          return item;
+          return await getMetaDataAndParseItem(tokenContract, i);
         })
       );
-
       setNfts(items);
       setLoadingState("loaded");
     } else {
-      window.alert("smart contract not deployed on selected network");
+      window.alert("Semething goes wrong !");
     }
   }
 
+  // Buy an NFT in clicking on "BUY"
   async function buyNft(nft) {
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(
-      nftmarketaddress,
-      NFTMarket.abi,
-      signer
-    );
-
+    const { marketContract } = await getContracts();
     const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
-
-    const transaction = await contract.createMarketSale(
+    const transaction = await marketContract.createMarketSale(
       nftaddress,
       nft.tokenId,
       {

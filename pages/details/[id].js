@@ -7,6 +7,8 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
+import { getContracts, getMetaDataAndParseItem } from "../../utils/web3Utils";
+
 import NftCard from "../../Components/NftCard";
 import Title from "../../Components/Title";
 import SubTitle from "../../Components/SubTitle";
@@ -40,25 +42,13 @@ export default function Details() {
   }, [router.isReady]);
 
   const list = async () => {
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
+    const { appAccount, tokenContract, marketContract } = await getContracts();
 
-    // Get listing price
-    const contract = new ethers.Contract(
-      nftmarketaddress,
-      NFTMarket.abi,
-      signer
-    );
-    let listingPrice = await contract.getListingPrice();
+    let listingPrice = await marketContract.getListingPrice();
     listingPrice = listingPrice.toString();
     try {
-      // Create the marketId
-      console.log(
-        `values are ${nft.itemId}, price ${price}, and nftaddress is ${nftaddress}`
-      );
-      transaction = await contract.listMarketItem(
+      // List the NFT
+      transaction = await marketContract.listMarketItem(
         nft.itemId,
         price,
         nftaddress,
@@ -68,61 +58,25 @@ export default function Details() {
       );
       await transaction.wait();
     } catch (e) {
-      console.log(`content of error is ${e}`);
+      console.log(`content of error is ${JSON.stringify(e)}`);
     }
   };
 
   async function loadNFT() {
-    const web3 = new Web3(window.ethereum);
-    //get all accounts
-    const appaccounts = await web3.eth.getAccounts();
-    setCurrentAccount(appaccounts[0]);
-    const networkId = await web3.eth.net.getId();
-    const nftData = NFT.networks[networkId];
-    const marketData = NFTMarket.networks[networkId];
-    if (nftData && marketData) {
-      // Token contract interaction
-      var abi = NFT.abi;
-      var address = nftData.address;
-      const tokenContract = new web3.eth.Contract(abi, address);
-      // Market contract interaction
-      abi = NFTMarket.abi;
-      address = marketData.address;
-      const marketContract = new web3.eth.Contract(abi, address);
-      const itemIDInt = parseInt(id);
-      const data = await marketContract.methods
-        .fetchItem(parseInt(itemIDInt))
-        .call();
-      const tokenUri = await tokenContract.methods
-        .tokenURI(data.tokenId)
-        .call();
-      const meta = await axios.get(tokenUri);
-      let price = ethers.utils.formatUnits(data.price.toString(), "ether");
-      let item = {
-        royaltiesPercentage: data.royaltiesPercentage,
-        price,
-        tokenId: data.tokenId,
-        owner: data.owner,
-        image: meta.data.image,
-        name: meta.data.name,
-        description: meta.data.description,
-        itemId: data.itemid,
-        creator: data.originalCreator,
-        tokenId: data.tokenId,
-      };
-      setNft(item);
-      setLoadingState("loaded");
-    } else {
-      window.alert("smart contract not deployed on selected network");
-    }
+    const { appAccount, tokenContract, marketContract } = await getContracts();
+    setCurrentAccount(appAccount);
+    const data = await marketContract.fetchItem(parseInt(parseInt(id)));
+    const item = await getMetaDataAndParseItem(tokenContract, data);
+    setNft(item);
+    setLoadingState("loaded");
   }
 
   return (
     <div className="container">
       <div className="flex flex-row">
         <div className="basis-1/2">
-          <div className="w-150 h-150">
-            <img className="cursor-pointer shadow-2xl" src={nft.image} />
+          <div className="w-150 h-150 p-5">
+            <img className="shadow-2xl" src={nft.image} />
           </div>
         </div>
         <div className="basis-1/2">
@@ -134,7 +88,7 @@ export default function Details() {
 
             <tr className="border-b">
               <TableTh>Creator</TableTh>
-              <TableTd>{nft.creator} </TableTd>
+              <TableTd>{nft.originalCreator} </TableTd>
             </tr>
 
             <tr className="border-b">
