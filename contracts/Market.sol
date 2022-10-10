@@ -186,7 +186,7 @@ contract NFTMarket is ReentrancyGuard {
         // Increment the total number of NFT sold
         _itemsSold.increment();
 
-        // Tranfert the listing fee to the owner
+        // Tranfert the listing fee to the owner (only if sold)
         payable(owner).transfer(listingPrice);
     }
 
@@ -219,6 +219,7 @@ contract NFTMarket is ReentrancyGuard {
         // Update the seller and owner value (Market contract)
         idToMarketItem[itemId].seller = idToMarketItem[itemId].owner;
         idToMarketItem[itemId].owner = payable(address(0));
+        idToMarketItem[itemId].price = price;
 
         // Update the ownership (NFT contract)
         IERC721(nftContract).transferFrom(

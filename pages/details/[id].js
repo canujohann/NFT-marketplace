@@ -41,22 +41,31 @@ export default function Details() {
     loadNFT();
   }, [router.isReady]);
 
+  // List the token on the market
   const list = async () => {
     const { appAccount, tokenContract, marketContract } = await getContracts();
 
     let listingPrice = await marketContract.getListingPrice();
     listingPrice = listingPrice.toString();
     try {
+      // Give the approval to the market to change the owner on his behalf
+      const tokenApprovalCall = await tokenContract.giveResaleApproval(
+        nft.tokenId
+      );
+      tokenApprovalCall.wait();
+
       // List the NFT
-      transaction = await marketContract.listMarketItem(
+      const transaction = await marketContract.listMarketItem(
         nft.itemId,
-        price,
+        ethers.utils.parseUnits(price, "ether"),
         nftaddress,
         {
           value: listingPrice,
         }
       );
       await transaction.wait();
+      // Redirect
+      router.push("/");
     } catch (e) {
       console.log(`content of error is ${JSON.stringify(e)}`);
     }

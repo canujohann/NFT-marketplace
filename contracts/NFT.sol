@@ -29,4 +29,14 @@ contract NFT is ERC721URIStorage {
         setApprovalForAll(contractAddress, true);
         return newItemId;
     }
+
+    // Need to give the approval (again) to the market when reselling the NFT
+    function giveResaleApproval(uint256 tokenId) public {
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "You must own this NFT in order to resell it"
+        );
+        setApprovalForAll(contractAddress, true);
+        return;
+    }
 }
