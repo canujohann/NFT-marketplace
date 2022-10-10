@@ -6,8 +6,9 @@ import Link from "next/link";
 const NftCard = ({ nft, action, actionName, i }) => (
   <div key={i} className="border shadow w-96">
     <div style={{ height: "300px" }}>
-      <Link href={`/details/${nft.itemId}`}>
+      <Link passHref href={`/details/${nft.itemId}`}>
         <img
+          alt="your NFT"
           className="cursor-pointer"
           src={nft.image}
           style={{ objectFit: "cover", width: "100%", height: "100%" }}
@@ -19,7 +20,7 @@ const NftCard = ({ nft, action, actionName, i }) => (
       <p className="text-2xl text-center font-bold text-black">{nft.name}</p>
       {/* price*/}
       <p className="text-black text-center">
-        <Image src="/ether-logo.svg" width={20} height={20} />
+        <Image alt="ether-logo" src="/ether-logo.svg" width={20} height={20} />
         Price - {nft.price} ETH
         <br />
         royalties: {nft.royaltiesPercentage}%

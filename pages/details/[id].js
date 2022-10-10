@@ -85,7 +85,7 @@ export default function Details() {
       <div className="flex flex-row">
         <div className="basis-1/2">
           <div className="w-150 h-150 p-5">
-            <img className="shadow-2xl" src={nft.image} />
+            <img alt={nft.name} className="shadow-2xl" src={nft.image} />
           </div>
         </div>
         <div className="basis-1/2">
