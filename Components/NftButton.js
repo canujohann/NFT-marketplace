@@ -1,13 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 
 const NftButton = ({ children, clickAction }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const wrapperAction = async () => {
+    try {
+      setIsLoading(true);
+      await clickAction();
+      setIsLoading(false);
+    } catch (e) {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <button
-      onClick={clickAction}
-      className="w-auto font-bold mt-4 mx-10 text-white rounded p-4 px-10 shadow-lg bg-neutral-900 hover:bg-neutral-600"
-    >
-      {children}
-    </button>
+    <>
+      <button
+        disabled={isLoading}
+        onClick={wrapperAction}
+        className="font-bold text-white rounded p-4 px-8 shadow-lg bg-neutral-900 hover:bg-neutral-600"
+      >
+        {children}
+      </button>
+    </>
   );
 };
 export default NftButton;
