@@ -23,6 +23,7 @@ const client = getIPFSClient();
 //
 export default function CreateItem() {
   const [fileUrl, setFileUrl] = useState(null);
+  const [tempFileUrl, setTempFileUrl] = useState(null);
   const [formInput, updateFormInput] = useState({
     price: "",
     name: "",
@@ -34,16 +35,11 @@ export default function CreateItem() {
   // Upload on IPFS
   async function onChange(e) {
     const file = e.target.files[0];
-    try {
-      const added = await client.add(file, {
-        progress: (prog) => console.log(`received: ${prog}`),
-      });
-      const url = `${privateGatewayIpfs}/${added.path}`;
-      setFileUrl(url);
-    } catch (e) {
-      console.log(e);
-    }
+    setFileUrl(file);
+    setTempFileUrl(URL.createObjectURL(file));
   }
+
+  // Create an Item
   async function createItem() {
     const { name, description, price, royalties } = formInput;
 
@@ -61,17 +57,23 @@ export default function CreateItem() {
       return;
     }
 
-    // Prepare data to save in IPFS
-    const data = JSON.stringify({
-      name,
-      description,
-      image: fileUrl,
-    });
-
+    //Send image to IPFS
     try {
+      const IPFSImage = await client.add(fileUrl, {
+        progress: (prog) => console.log(`received: ${prog}`),
+      });
+      const imageUrl = `${privateGatewayIpfs}/${IPFSImage.path}`;
+
+      // Prepare data to save in IPFS
+      const NFTMetadata = JSON.stringify({
+        name,
+        description,
+        image: imageUrl,
+      });
+
       // Update metadata on IPFS
-      const added = await client.add(data);
-      const url = `${privateGatewayIpfs}/${added.path}`;
+      const IPFSmetadata = await client.add(NFTMetadata);
+      const url = `${privateGatewayIpfs}/${IPFSmetadata.path}`;
 
       // Mint the NFT
       createSale(url);
@@ -80,6 +82,7 @@ export default function CreateItem() {
       console.log(e);
     }
   }
+
   async function createSale(url) {
     try {
       const { appAccount, tokenContract, marketContract } =
@@ -158,12 +161,12 @@ export default function CreateItem() {
             className="my-4"
             onChange={onChange}
           />
-          {fileUrl && (
+          {tempFileUrl && (
             <img
               alt="your-nft"
               className="rounded mt-4 "
               width="350"
-              src={fileUrl}
+              src={tempFileUrl}
             />
           )}
 
