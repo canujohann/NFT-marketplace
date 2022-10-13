@@ -24,6 +24,8 @@ const NftCard = ({ nft, action, actionName, i }) => (
         Price - {nft.price} ETH
         <br />
         royalties: {nft.royaltiesPercentage}%
+        <br />
+        NFT sold {nft.sold} time(s)
       </p>
       <p className="pt-4 text-center">{nft.description}</p>
       {action && (

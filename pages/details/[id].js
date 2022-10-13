@@ -124,6 +124,11 @@ export default function Details() {
               <TableTh>token ID</TableTh>
               <TableTd>{nft.tokenId}</TableTd>
             </tr>
+
+            <tr className="border-b">
+              <TableTh>Sold</TableTh>
+              <TableTd>{nft.sold} time(s)</TableTd>
+            </tr>
           </table>
           {nft.owner == currentAccount && (
             <>

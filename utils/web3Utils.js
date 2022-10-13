@@ -39,6 +39,7 @@ export const getMetaDataAndParseItem = async (tokenContract, itemMarket) => {
   return {
     royaltiesPercentage: itemMarket.royaltiesPercentage,
     price,
+    sold: itemMarket.sold.toString(),
     tokenId: itemMarket.tokenId.toString(),
     seller: itemMarket.seller,
     owner: itemMarket.owner,
